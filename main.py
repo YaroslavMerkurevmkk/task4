@@ -8,6 +8,11 @@ class Coffee(QMainWindow):
     def __init__(self):
         super(Coffee, self).__init__()
         uic.loadUi('main.ui', self)
+        self.update()
+        self.pushButton.clicked.connect(self.run)
+        self.pushButton_2.clicked.connect(self.update)
+
+    def update(self):
         with sqlite3.connect('coffee.sqlite') as db:
             cursor = db.cursor()
             coffee_result = cursor.execute("""SELECT * FROM data""").fetchall()
@@ -17,7 +22,6 @@ class Coffee(QMainWindow):
         for i, row in enumerate(coffee_result):
             for j, item in enumerate(row):
                 self.tableWidget.setItem(i, j, QTableWidgetItem(str(item)))
-        self.pushButton.clicked.connect(self.run)
 
     def run(self):
         aecoffee.show()
@@ -32,6 +36,20 @@ class AECoffee(QMainWindow):
         self.tableWidget.itemChanged.connect(self.item_changed)
         self.pushButton.clicked.connect(self.findCoffee)
         self.pushButton_2.clicked.connect(self.save_results)
+        self.pushButton_3.clicked.connect(self.add)
+
+    def add(self):
+        title = self.lineEdit_2.text()
+        stepen = self.lineEdit_3.text()
+        mol = self.lineEdit_4.text()
+        des = self.lineEdit_5.text()
+        price = self.lineEdit_6.text()
+        volum = self.lineEdit_7.text()
+        with sqlite3.connect('coffee.sqlite') as db:
+            cursor = db.cursor()
+            cursor.execute("""INSERT INTO data (title, stepen, mol, des, price, volum) VALUES(?, ?, ?, ?, ?, ?)""",
+                           (title, int(stepen), mol, des, int(price), int(volum)))
+            db.commit()
 
     def item_changed(self, item):
         self.change[self.titles[item.column()]] = item.text()
